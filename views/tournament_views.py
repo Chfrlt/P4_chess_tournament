@@ -1,38 +1,67 @@
-class TournamentView:
+from views.shared_view import SharedView
+
+
+class TournamentView(SharedView):
+
+    @staticmethod
     def creator_view() -> dict:
         parameters = {}
-        parameters['name'] = input("Name ? ")
-        parameters['location'] = input("Location ? ")
-        format_ref = ["rapid", "blitz", "bullet"]
-        format_input = input("Format ?\n    1: rapid\n    2: blitz\n    3: bullet")
-        try:
-            index = int(format_input)
-            parameters['game_format'] = format_ref[index]
-        except ValueError or IndexError:
-            print('Invalid input')
-        except IndexError:
-            print()
-        parameters['description'] = input("Description ? ")
-        parameters['date_start'] = input("Starting date ? ")
-        parameters['date_end'] = input("Ending date ?\n Optional, [0]: Same as starting date.")
+        parameters['name'] = input('Name ?\n >> ')
+        parameters['location'] = input('Location ?\n >> ')
+        format_options = ('rapid', 'blitz', 'bullet')
+        max_index = len(format_options)
+        print('Format ?\n    [1] rapid\n    [2] blitz\n    [3] bullet')
+        while True:
+            index = TournamentView.get_input_for_selectors(max_index)
+            parameters['game_format'] = format_options[index]
+            break
+        parameters['description'] = input('Description ?\n >> ')
+        parameters['date_start'] = input('Starting date ?\n >> ')
+        print('Ending date ?')
+        print('Optional | [0]: Same as starting date.')
+        input_date_end = input(' >> ')
+        if TournamentView.input_is_valid_as_an_int(input_date_end) is True:
+            if int(input_date_end) == 0:
+                parameters['date_end'] = parameters['date_start']
+            else:
+                parameters['date_end'] = input_date_end 
+        else:
+            parameters['date_end'] = input_date_end
         return parameters
 
+    @staticmethod
+    def print_tournaments(tournaments_strings: list) -> int:
+        print('== Tournaments ==')
+        for i, t in enumerate(tournaments_strings):
+            print(f"[{i + 1}] {t}")
 
-    def selector_view(tournaments):
-        if type(tournaments) is list:
-            for i, t in enumerate(tournaments):
-                print('[{}] {}'.format(i + 1, t.__repr__()))
-        print('>> Select: ')
+    @staticmethod
+    def print_players(players_strings: list):
+        print('== Players in Tournament ==')
+        for i, p in enumerate(players_strings):
+            print(f"[{i + 1}]: | {p}")
+        input('Press a key to continue.')
 
+    @staticmethod
+    def no_players_error():
+        print('No players found.')
+        input('Press a key to continue')
 
-    def start_tournament_view(self, tournament):
-        print('Tournament started at {}'.format(tournament.rounds[0].start))
+    @staticmethod
+    def no_tournaments_error():
+        print('No tournaments found.')
+        input('Press a key to continue')
 
+    @staticmethod
+    def get_input_for_selectors(max_index: int) -> int:
+        '''takes user input, check if it is a valid and
+        if it is inferior to the max index.
 
-    def next_games_view(games_list):
-        for game in games_list:
-            print(game)
-
-
-    def print_message(message):
-        print(message)
+        If both conditions are met, returns the index'''
+        raw_input = input(' >> ')
+        if TournamentView.input_is_valid_as_an_int(raw_input) is True:
+            index = int(raw_input) - 1
+            if index > max_index:
+                SharedView.error_invalid_user_input(error=IndexError)
+            else:
+                return index

@@ -1,65 +1,168 @@
-def main_menu_view(tournament):
-    print('== Main Menu ==')
-    if tournament is not None:
-        print('Current tournament: {}, {}, {}, Date start: {}, Date end: {}'
-            .format(tournament.name, tournament.location, tournament.game_format,
-                tournament.date_start, tournament.date_end))
-    print('[1] Create tournament')
-    print('[2] Select tournament')
-    print('[3] See tournament informations')
-    print('[4] Tournament menu')
-    print('[5] Player menu')
-    print('[6] Delete all tournaments')
-    print('[0] Exit')
-    return input('>> Select: ')
+from typing import Union
 
 
-def tournament_submenu_view(tournament, current_round: str):
-    """Tournament menu"""
-    print('== Tournament Menu ==')
-    print('{}, {}, {}, {}, {}'
-        .format(tournament.name, tournament.location, tournament.game_format,
-            tournament.date_start, tournament.date_end))
-    print('{}'.format(current_round))
-    print('===================')
-    print('[1] Show games in round')
-    print('[2] Edit round')
-    print('[3] End round')
-    print('[4] Create Player')
-    print('[5] Add Player')
-    print("[6] Tournament's games history")
-    print('[7] Start next round')
-    print('[9] Main Menu')
-    print('[0] Exit')
-    return input('>> Select: ')
+class MenuView():
 
+    @staticmethod
+    def menu_view(options: list, name: str,
+                  tournament_string: str = None,
+                  round_string: str = None):
+        print(f"== {name} ==")
+        print('==============')
+        if tournament_string:
+            print('Selected Tournament:')
+            print(tournament_string)
+        if round_string:
+            print(round_string)
+        print('==============')
+        for i, o in enumerate(options):
+            print(f"[{i + 1}] {o}")
+        raw_input = input('>> Selection: ')
+        option_selected = MenuView.input_validation(
+            raw_input, options)
+        return option_selected
 
-def player_submenu_view():
-    print('== Player menu ==')
-    print('===================')
-    print('[1] Show all players')
-    print('[2] Show all players by name')
-    print('[3] Show all players by elo')
-    print('[4] Show all players by score')
-    print('[5] Create player(s)')
-    print("[6] Update a player's elo")
-    print('[7] Delete all players in database')
-    print('[9] Main Menu')
-    print('[0] Exit')
-    return input('>> Select: ')
+    @staticmethod
+    def input_validation(raw_input: str, options: list):
+        try:
+            user_input = int(raw_input)
+            option_selected = options[user_input - 1]
+            return option_selected
+        except ValueError as e:
+            MenuView.error_invalid_user_input(e)
+            return
+        except IndexError as e:
+            MenuView.error_invalid_user_input(e)
+            return
 
+    @staticmethod
+    def error_invalid_user_input(error: Union[ValueError, IndexError]):
+        if isinstance(error, ValueError):
+            print('Invalid Input. Must be a number')
+        elif isinstance(error, IndexError):
+            print("Input didn't match any options")
 
-def screen(action, *arg):
-    if isinstance(action, str):
-        print(action)
+    @staticmethod
+    def get_user_input(msg: str) -> bool:
+        user_input = input(f"{msg}")
+        return user_input
+
+    @staticmethod
+    def error_no_tournament_selected():
+        print('No tournament selected. '
+              'Please select a tournament first.')
         input('Press a key to continue.')
-        return
-    elif arg:
-        return_value = action(arg)
-    else:
-        return_value = action()
-    input('Success!\n Press a key to continue.')
-    return return_value if return_value else None
 
-def get_user_input(message):
-    return input(message)
+    @staticmethod
+    def error_tournament_not_started():
+        print("Tournament hasn't started. "
+              'Start tournament by creating a round.')
+        input('Press a key to continue.')
+
+    @staticmethod
+    def error_tournament_started():
+        print('Tournament has started. Option is no longer available.')
+        input('Press a key to continue.')
+
+    @staticmethod
+    def delete_all_tournament_input_confirmation() -> str:
+        print('Delete all tournaments ? | y/n')
+        return input(' >> ')
+
+    @staticmethod
+    def delete_all_tournament_success():
+        print('All tournaments have been deleted.')
+        input('Press a key to continue.')
+
+    @staticmethod
+    def delete_all_players_input_confirmation() -> str:
+        print('Delete all players ? | y/n')
+        return input(' >> ')
+
+    @staticmethod
+    def delete_all_players_success():
+        print('All players have been deleted.')
+        input('Press a key to continue.')
+
+    @staticmethod
+    def error_player_deletion_exist_in_tournament() -> str:
+        print('Player exist in one or more existing tournament(s).'
+              ' Proceeding will delete the player from tournament(s)'
+              ' whom have not started.')
+        print('Do you still wish to continue ? | y/n')
+        return input(' >> ')
+
+    @staticmethod
+    def round_modification_input_confirmation() -> str:
+        print('Round has ended. Do you still wish to proceed ?  | y/n')
+        return input(' >> ')
+
+    @staticmethod
+    def error_round_not_ended():
+        print('End the current round first.')
+        input('Press a key to continue.')
+
+    @staticmethod
+    def error_tournament_not_full():
+        print('Tournament requires 8 registered players to start round.')
+        input('Press a key to continue.')
+
+    @staticmethod
+    def error_tournament_is_full():
+        print('The maximum number of players (8) has been reached')
+        input('Press a key to continue.')
+
+    @staticmethod
+    def get_input_nbr_players_to_create() -> str:
+        print('Number of players to create:')
+        print('[0] Cancel')
+        return input(' >> ')
+
+    @staticmethod
+    def option_add_to_tournament_when_player_creation() -> str:
+        print('Do you wish to add the created players '
+              'to the current tournament ? | y/n')
+        return input(' >> ')
+
+    @staticmethod
+    def error_no_player_in_db():
+        print('No players in database. Please create player(s) first.')
+        input('Press a key to continue.')
+
+    @staticmethod
+    def error_no_tournament_in_db():
+        print('No tournament in database. Please create a tournament first.')
+        input('Press a key to continue.')
+
+    @staticmethod
+    def error_no_players_in_tournament():
+        print('No players in tournament.')
+        input('Press a key to continue.')
+
+    @staticmethod
+    def player_add_to_tournament_success(player_surname, player_first_name):
+        print(f"{player_surname} {player_first_name} succesfully "
+              'added to the tournament.')
+        input('Press a key to continue.')
+
+    @staticmethod
+    def error_round_already_ended():
+        print('Round has already ended. '
+              'You can still edit games using the "edit games" options.')
+        print('If you wish to proceed to next round, '
+              'use the "start next round" option.')
+        input('Press a key to continue')
+
+    @staticmethod
+    def error_tournament_ended():
+        print('The 4 round have been played, tournament has ended.')
+        print('==== Results ====')
+
+    @staticmethod
+    def player_creation_number_printer(player_number: int):
+        print(f"== Creating Player {player_number} ==")
+
+    @staticmethod
+    def error_player_already_in_tournament():
+        print('Impossible: Selected player is already in tournament')
+        input('Press a key ton continue.')

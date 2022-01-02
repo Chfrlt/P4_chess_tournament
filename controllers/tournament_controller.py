@@ -2,113 +2,126 @@ from datetime import datetime
 
 from models.player_model import Player
 from models.tournament_model import Tournament
-from models.round_model import Round
 from views.tournament_views import TournamentView
 
 
 class TournamentControl:
 
+    def __init__(self) -> None:
+        pass
 
-    def selector():
+    def tournament_selector(self) -> Tournament:
         tournaments_list = Tournament.get_tournaments_in_db()
-        TournamentView.selector_view(tournaments_list)
-        selection_input = input()
-        try:
-            selection = int(selection_input)
-            try:
-                t = tournaments_list[selection - 1]
-                return t
-            except IndexError:
-                TournamentView.print_message(
-                    'Invalid input. Did not correspond to any item in the list')
-        except ValueError:
-            TournamentView.print_message('Invalid input: Was not a number.')
-        
+        tournaments_strings = []
+        for tournament in tournaments_list:
+            tournaments_strings.append(repr(tournament))
+        TournamentView.print_tournaments(tournaments_strings)
+        max_index = len(tournaments_list)
+        while True:
+            index = TournamentView.get_input_for_selectors(max_index)
+            if index is not None:
+                tournament = tournaments_list[index]
+                return tournament
 
-    def create_tournament():
-        tournament_dict = TournamentView.creator_view()
-        try:
-            date_end_int = int(tournament_dict['date_end'])
-            if date_end_int == 0:
-                tournament_dict['date_end'] = tournament_dict['date_start']
-        except ValueError:
-            pass
+    def tournament_player_selector(self, tournament: Tournament) -> dict:
+        players_list = tournament.players
+        players_strings = []
+        for player in players_list:
+            player = Player.deserialize(player)
+            players_strings.append(repr(player))
+        TournamentView.print_players(players_strings)
+        max_index = len(players_list)
+        while True:
+            index = TournamentView.get_input_for_selectors(max_index)
+            if index is not None:
+                player = players_list[index]
+                return player
+
+
+    def create_tournament(self) -> Tournament:
+        tournament_parameters = TournamentView.creator_view()
         new_tournament = Tournament(
-            tournament_dict['name'],
-            tournament_dict['location'],
-            tournament_dict['game_format'],
-            tournament_dict['description'],
-            tournament_dict['date_start'],
-            tournament_dict['date_end']
-        )
-        return Tournament.insert(new_tournament)
+            tournament_parameters['name'],
+            tournament_parameters['location'],
+            tournament_parameters['game_format'],
+            tournament_parameters['description'],
+            tournament_parameters['date_start'],
+            tournament_parameters['date_end'])
+        Tournament.insert(new_tournament)
+        return new_tournament
 
+    @staticmethod
+    def get_sorted_players_in_tournament(tournament: Tournament,
+                                         score_sorted: bool = False,
+                                         elo_sorted: bool = False,
+                                         _print: bool = False) -> list:
+        players = tournament.players
+        if score_sorted is True:
+            players = sorted(players, key=lambda x: x['score'], reverse=True)
+        if elo_sorted is True:
+            players = sorted(players, key=lambda x: x['elo'], reverse=True)
+        if _print is True:
+            players_strings = []
+            for player in players:
+                player_obj = Player.deserialize(player)
+                players_strings.append(repr(player_obj))
+            TournamentView.print_players(players_strings)
+        return players
 
-    def add_player_to_tournament(player : Player, tournament: Tournament):
-        tournament.add_player_in_tournament_db(player.serialize())
+    @staticmethod
+    def update_a_player_in_tournaments(player_to_update: Player,
+                                       updated_player: dict,
+                                       curr_tournament: Tournament = None):
+        if curr_tournament:
+            players = curr_tournament.players
+            for player in players:
+                if player_to_update.surname == player['surname']:
+                    index = players.index(player)
+                    players[index] = updated_player
+                    curr_tournament.update()
+        for tournament in Tournament.get_tournaments_in_db():
+            players = tournament.players
+            for player in players:
+                if player_to_update.surname == player['surname']:
+                    index = players.index(player)
+                    players[index] = updated_player
+                    tournament.update()
 
-
-    def check_if_tournament_is_full(tournament):
-        if len(tournament.players) < 7:
-            return False
-        else:
-            return True
-
-
-    def create_next_round(tournament: Tournament):
-        players_sorted = sorted(tournament.players, key=lambda x: x['score'], reverse=True)
-        i = 1
-        while i < len(players_sorted):
-            if players_sorted[i][('score')] == players_sorted[i - 1]['score']:
-                if players_sorted[i]['elo'] < players_sorted[i - 1]['elo']:
-                    players_sorted[i], players_sorted[i - 1] = players_sorted[i - 1], players_sorted[i]
-                    i = 1
-                    continue
-            i += 1
-        old_pairings = []
-        for round in tournament.rounds:
-            for game in round['games']:
-                old_pairings.append([game[0][0], game[1][0]])
-        
-        new_pairing = []
-        counter = len(players_sorted)
-        while len(players_sorted) >= 2:
-            p1 = players_sorted[0]
-            i = 1
-            if len(players_sorted) == 2:
-                p2 = players_sorted[i]
-                new_pairing.append([p1, p2])
-                players_sorted.remove(p1)
-                players_sorted.remove(p2)
-                break
-            while i < len(players_sorted):
-                p2 = players_sorted[i]
-                if p1 != p2 and [p1, p2] not in old_pairings and [p2, p1] not in old_pairings:
-                    new_pairing.append([p1, p2])
-                    players_sorted.remove(p1)
-                    players_sorted.remove(p2)
-                    break
-                i += 1
-            counter -= 1
-            if counter == 0:
-                return
-        next_games = []
-        for pair in new_pairing:
-            p1 = [p for p in players_sorted if p == pair[0]]
-            p2 = [p for p in players_sorted if p == pair[1]]
-            next_games.append([[p1, 0], [p2, 0]])
-        round = Round(
-            name = 'Round {}'.format(len(tournament.rounds) + 1),
-            games = next_games,
-            start_date = datetime.today().strftime('%Y-%m-%d %H:%M')
-        )
-
-
+    @staticmethod
     def end_round(tournament: Tournament):
         end_date = datetime.today().strftime('%Y-%m-%d %H:%M')
-        tournament.end_round_in_tournament_db(end_date)
+        tournament.get_last_round()['end_date'] = end_date
+        tournament.update()
 
+    def check_if_player_is_in_any_tournament(self, player: Player) -> bool:
+        for tour in Tournament.get_tournaments_in_db():
+            if player.serialize() in tour.players:
+                return True
 
-    def update_selected_tournament(tournament):
-        tournament_updated = Tournament.find_tournament(tournament)
-        return Tournament.deserialize(tournament_updated)
+    def delete_player_in_tournaments(self, player: dict,
+                                     tournament: Tournament = None):
+        if tournament is None:
+            for tournament in Tournament.get_tournaments_in_db():
+                if player in tournament.players:
+                    if tournament.has_started() is True:
+                        break
+                    else:
+                        tournament.players.remove(player)
+                        tournament.update()
+        elif player in tournament.players:
+            tournament.players.remove(player)
+            tournament.update()
+
+    def delete_tournament(self, tournament: Tournament = None,
+                          all_tournaments: bool = False):
+        if all_tournaments is True:
+            Tournament.delete_all_tournaments()
+        else:
+            tournament.delete_a_tournament()
+
+    @staticmethod
+    def check_if_tournament_in_db() -> bool:
+        if Tournament.get_tournaments_in_db():
+            return True
+        else:
+            return False
