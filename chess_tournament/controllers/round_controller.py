@@ -4,7 +4,7 @@ from itertools import cycle
 from controllers.tournament_controller import TournamentControl
 from models.round_model import Round
 from models.tournament_model import Tournament
-from views.round_views import RoundView
+import views.round_views
 
 
 class RoundControl:
@@ -17,15 +17,15 @@ class RoundControl:
         if isinstance(round, dict):
             round = Round.deserialize(round)
         rnd_repr = repr(round)
-        RoundView.print_round(rnd_repr)
+        views.round_views.print_round(rnd_repr)
         if print_games is True:
             games_reprs = round.game_repr()
-            RoundView.print_game(games_reprs)
+            views.round_views.print_game(games_reprs)
 
     def selector_game(self, round: Round):
         """Select a game to update"""
         self.display_round_infos(round, print_games=True)
-        game_index = RoundView.game_selector_view()
+        game_index = views.round_views.game_selector_view()
         return game_index
 
     @staticmethod
@@ -73,7 +73,8 @@ class RoundControl:
                 for i in temp_players:
                     if head['score'] < i['score']:
                         head = i
-                    elif head['elo'] < i['elo'] and head['score'] == i['score']:
+                    elif (head['elo'] < i['elo'] and
+                          head['score'] == i['score']):
                         head = i
             players_sorted.append(head)
             temp_players.remove(head)
@@ -141,7 +142,8 @@ class RoundControl:
         player2 = game[1][0]
         p1_index = tournament.players.index(player1)
         p2_index = tournament.players.index(player2)
-        result = RoundView.update_game_view(game_index, player1, player2)
+        result = views.round_views.update_game_view(game_index,
+                                                    player1, player2)
         if result == -1:
             return
         elif result == 0:

@@ -52,6 +52,11 @@ class Tournament():
             }
         return tournament
 
+    def insert(self):
+        tournament = self.serialize()
+        table.insert(tournament)
+        return tournament
+
     @staticmethod
     def deserialize(tournament):
         t = Tournament(tournament['name'], tournament['location'],
@@ -60,17 +65,19 @@ class Tournament():
                        tournament['rounds'], tournament['players'])
         return t
 
-    def insert(self):
-        tournament = self.serialize()
-        table.insert(tournament)
-        return tournament
-
     @staticmethod
     def get_tournaments_in_db():
         list_tournaments = []
         for tournament in table.all():
             list_tournaments.append(Tournament.deserialize(tournament))
         return list_tournaments
+
+    @staticmethod
+    def delete_all_tournaments():
+        table.truncate()
+
+    def delete_a_tournament(self):
+        table.remove(where('name') == self.name)
 
     def add_round_to_tournament(self, round: Round):
         self.rounds.append(round)
@@ -99,13 +106,6 @@ class Tournament():
 
     def update(self):
         table.update(self.serialize(), q.name == self.name)
-
-    @staticmethod
-    def delete_all_tournaments():
-        table.truncate()
-
-    def delete_a_tournament(self):
-        table.remove(where('name') == self.name)
 
     def has_started(self) -> bool:
         if self.rounds:

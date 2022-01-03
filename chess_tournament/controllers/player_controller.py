@@ -1,5 +1,5 @@
 from models.player_model import Player
-from views.player_views import PlayerView
+import views.player_views
 
 
 class PlayerControl:
@@ -9,7 +9,7 @@ class PlayerControl:
 
     def create_player(self) -> Player:
         while True:
-            player_parameters = PlayerView.creator_view()
+            player_parameters = views.player_views.creator_view()
             try:
                 new_player = Player(
                     player_parameters['first_name'],
@@ -21,14 +21,14 @@ class PlayerControl:
                 Player.insert(new_player)
                 return new_player
             except ValueError:
-                PlayerView.invalid_elo_input()
+                views.player_views.invalid_elo_input()
 
     def selector(self) -> Player:
         player_list = Player.get_players_in_db()
         if self.check_if_player_in_db() is False:
-            PlayerView.selector_view()
+            views.player_views.selector_view()
         else:
-            index = PlayerView.selector_view(player_list)
+            index = views.player_views.selector_view(player_list)
             if index is not None:
                 return player_list[index]
 
@@ -42,11 +42,11 @@ class PlayerControl:
             players_strings = []
             for player in players:
                 players_strings.append(repr(player))
-            PlayerView.print_players(players_strings)
+            views.player_views.print_players(players_strings)
 
     def update_player(self, player: Player):
         player = player.serialize()
-        to_update = PlayerView.update_view(player)
+        to_update = views.player_views.update_view(player)
         if to_update is None:
             return
         new_value = to_update['value']
@@ -55,12 +55,11 @@ class PlayerControl:
             try:
                 new_value = Player.is_valid_elo(new_value)
             except ValueError:
-                PlayerView.invalid_elo_input()
+                views.player_views.invalid_elo_input()
                 return
         player[key] = new_value
         Player.deserialize(player).update_player_in_db(key)
         return player
-            
 
     @staticmethod
     def check_if_player_in_db() -> bool:

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from models.player_model import Player
 from models.tournament_model import Tournament
-from views.tournament_views import TournamentView
+import views.tournament_views
 
 
 class TournamentControl:
@@ -15,10 +15,10 @@ class TournamentControl:
         tournaments_strings = []
         for tournament in tournaments_list:
             tournaments_strings.append(repr(tournament))
-        TournamentView.print_tournaments(tournaments_strings)
+        views.tournament_views.print_tournaments(tournaments_strings)
         max_index = len(tournaments_list)
         while True:
-            index = TournamentView.get_input_for_selectors(max_index)
+            index = views.tournament_views.get_input_for_selectors(max_index)
             if index is not None:
                 tournament = tournaments_list[index]
                 return tournament
@@ -29,17 +29,16 @@ class TournamentControl:
         for player in players_list:
             player = Player.deserialize(player)
             players_strings.append(repr(player))
-        TournamentView.print_players(players_strings)
+        views.tournament_views.print_players(players_strings)
         max_index = len(players_list)
         while True:
-            index = TournamentView.get_input_for_selectors(max_index)
+            index = views.tournament_views.get_input_for_selectors(max_index)
             if index is not None:
                 player = players_list[index]
                 return player
 
-
     def create_tournament(self) -> Tournament:
-        tournament_parameters = TournamentView.creator_view()
+        tournament_parameters = views.tournament_views.creator_view()
         new_tournament = Tournament(
             tournament_parameters['name'],
             tournament_parameters['location'],
@@ -65,7 +64,7 @@ class TournamentControl:
             for player in players:
                 player_obj = Player.deserialize(player)
                 players_strings.append(repr(player_obj))
-            TournamentView.print_players(players_strings)
+            views.tournament_views.print_players(players_strings)
         return players
 
     @staticmethod
