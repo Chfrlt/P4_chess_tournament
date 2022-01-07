@@ -29,14 +29,14 @@ class Player():
         return player_string
 
     @staticmethod
-    def is_valid_elo(elo):
+    def is_valid_elo(elo) -> int:
         if elo:
             try:
-                int(elo)
-                if int(elo) <= 0:
+                elo = int(elo)
+                if elo <= 0:
                     raise ValueError
                 else:
-                    return int(elo)
+                    return elo
             except ValueError:
                 raise ValueError
 

@@ -7,7 +7,7 @@ from models.tournament_model import Tournament
 import views.round_views
 
 
-class RoundControl:
+class RoundControl(TournamentControl):
 
     def __init__(self) -> None:
         pass
@@ -28,8 +28,7 @@ class RoundControl:
         game_index = views.round_views.game_selector_view()
         return game_index
 
-    @staticmethod
-    def add_round_to_tournament(tournament: Tournament, round: Round):
+    def add_round_to_tournament(self, tournament: Tournament, round: Round):
         if isinstance(round, object):
             round = round.serialize()
         tournament.rounds.append(round)
@@ -37,7 +36,7 @@ class RoundControl:
 
     def create_round(self, tournament: Tournament):
         players_in_tournament_elo_sorted = (
-            TournamentControl.get_sorted_players_in_tournament(
+            self.get_sorted_players_in_tournament(
                 tournament, elo_sorted=True))
         players = self.players_sorter_for_round(
             players_in_tournament_elo_sorted)
@@ -59,8 +58,7 @@ class RoundControl:
             )
         self.add_round_to_tournament(tournament, new_round)
 
-    @staticmethod
-    def players_sorter_for_round(players: list) -> list:
+    def players_sorter_for_round(self, players: list) -> list:
         '''From a list of players, sort the list for round pairings
         Players are sorted by score (higher to lower).
         If scores are equals, by elo (higher to lower)'''
@@ -80,8 +78,7 @@ class RoundControl:
             temp_players.remove(head)
         return players_sorted
 
-    @staticmethod
-    def first_round_pairings(players) -> list:
+    def first_round_pairings(self, players) -> list:
         upper_half = players[:int(len(players) / 2)]
         lower_half = players[int(len(players) / 2):]
         new_games = []
@@ -94,8 +91,8 @@ class RoundControl:
             new_games.append(new_game)
         return new_games
 
-    @staticmethod
-    def past_first_round_pairings(players: list, old_games: list) -> list:
+    def past_first_round_pairings(self, players: list,
+                                  old_games: list) -> list:
         upper_half = players[:int(len(players) / 2)]
         lower_half = players[int(len(players) / 2):]
         upper_half.reverse()
@@ -107,18 +104,28 @@ class RoundControl:
             player_iterator = cycle(lower_half)
             player2 = player_iterator.__next__()
             for old_game in old_games:
-                if player1 in old_game and player2 in old_game:
-                    player2 = player_iterator.__next__()
-                else:
-                    upper_half.remove(player1)
-                    lower_half.remove(player2)
-                    new_game = ([player1, 0.0], [player2, 0.0])
-                    new_games.append(new_game)
-                    break
+                if player1 in old_game:
+                    if player2 in old_game:
+                        player2 = player_iterator.__next__()
+                    else:
+                        try:
+                            player1_next = upper_half[1]
+                            player2_next = player_iterator.__next__()
+                            for old_game in old_games:
+                                if player1_next in old_game:
+                                    if player2_next in old_game:
+                                        player2 = player2_next
+                                        break
+                        except IndexError:
+                            continue
+            upper_half.remove(player1)
+            lower_half.remove(player2)
+            new_game = ([player1, player2])
+            new_games.append(new_game)
         return new_games
 
-    @staticmethod
-    def reset_game_results(game: tuple) -> tuple:
+    def reset_game_results(self,
+                           game: tuple) -> tuple:
         """Reset a game result to 0"""
         if game[0][1] == 1:
             game[0][0]['score'] -= 1
@@ -166,8 +173,7 @@ class RoundControl:
         tournament.get_last_round().games[game_index] = game
         tournament.update()
 
-    @staticmethod
-    def end_round(tournament: Tournament):
+    def end_round(self, tournament: Tournament):
         """End a round, update in db"""
         if tournament.get_last_round().has_ended() is False:
             end_date = datetime.today().strftime('%Y-%m-%d %H:%M')

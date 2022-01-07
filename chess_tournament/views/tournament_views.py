@@ -1,5 +1,5 @@
 from views.shared_view import (input_is_valid_as_an_int,
-                               error_invalid_user_input)
+                               get_input_for_selectors)
 
 
 def creator_view() -> dict:
@@ -49,16 +49,3 @@ def no_players_error():
 def no_tournaments_error():
     print('No tournaments found.')
     input('Press a key to continue')
-
-
-def get_input_for_selectors(max_index: int) -> int:
-    '''takes user input, check if it is a valid and
-    if it is inferior to the max index.
-    If both conditions are met, returns the index'''
-    raw_input = input(' >> ')
-    if input_is_valid_as_an_int(raw_input) is True:
-        index = int(raw_input) - 1
-        if index > max_index:
-            error_invalid_user_input(error=IndexError)
-        else:
-            return index

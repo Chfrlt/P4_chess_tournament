@@ -11,7 +11,7 @@ def print_game(games_reprs: str):
     input('Press a key to continue')
 
 
-def game_selector_view():
+def game_selector_view() -> int:
     print('Select a game:\n [0] Cancel')
     while True:
         game_selection = get_input_for_selectors(4)

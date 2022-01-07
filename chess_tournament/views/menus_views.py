@@ -17,12 +17,14 @@ def menu_view(options: list, name: str,
     for i, o in enumerate(options):
         print(f"[{i + 1}] {o}")
     index = get_input_for_selectors(i)
-    if index:
+    if index is not None:
         option_selected = options[index]
+        print(option_selected)
         return option_selected
 
 
-def input_validation(raw_input: str, options: list):
+def input_validation(raw_input: str,
+                     options: list) -> Union[ValueError, IndexError, str]:
     try:
         user_input = int(raw_input)
         option_selected = options[user_input - 1]
@@ -40,11 +42,6 @@ def error_invalid_user_input(error: Union[ValueError, IndexError]):
         print('Invalid Input. Must be a number')
     elif isinstance(error, IndexError):
         print("Input didn't match any options")
-
-
-def get_user_input(msg: str) -> bool:
-    user_input = input(f"{msg}")
-    return user_input
 
 
 def error_no_tournament_selected():

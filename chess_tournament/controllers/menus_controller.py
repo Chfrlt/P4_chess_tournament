@@ -6,18 +6,13 @@ from controllers.player_controller import PlayerControl
 from controllers.tournament_controller import TournamentControl
 
 
-class MenuControl():
+class MenuControl(RoundControl, PlayerControl, TournamentControl):
 
-    def __init__(self, player_controller: PlayerControl,
-                 tournament_controller: TournamentControl,
-                 round_controller: RoundControl):
-
+    def __init__(self):
+        super().__init__()
         self.options = {}
         self.tournament = None
         self.name = None
-        self.p_control = player_controller
-        self.t_control = tournament_controller
-        self.r_control = round_controller
 
     def execute_menu(self):
         while True:
@@ -94,13 +89,13 @@ class MenuControl():
 
     def create_tournament(self):
         if not self.tournament:
-            self.tournament = self.t_control.create_tournament()
+            self.tournament = super().create_tournament()
         else:
-            self.t_control.create_tournament()
+            super().create_tournament()
 
     def select_tournament(self):
-        if self.t_control.check_if_tournament_in_db() is True:
-            self.tournament = self.t_control.tournament_selector()
+        if self.check_if_any_tournament_in_db() is True:
+            self.tournament = self.tournament_selector()
         else:
             views.menus_views.error_no_tournament_in_db()
 
@@ -108,21 +103,21 @@ class MenuControl():
         confirmation = (
             views.menus_views.delete_all_tournament_input_confirmation())
         if confirmation == 'y':
-            self.t_control.delete_tournament(all_tournaments=True)
+            self.delete_tournament(all_tournaments=True)
             views.menus_views.delete_all_tournament_success()
             self.tournament = None
         else:
-            tournament_to_delete = self.t_control.tournament_selector()
+            tournament_to_delete = self.tournament_selector()
             if self.tournament:
                 if self.tournament.name == tournament_to_delete.name:
                     self.tournament = None
-            self.t_control.delete_tournament(tournament_to_delete)
+            self.delete_tournament(tournament_to_delete)
 
     def show_games_in_round(self):
         if self.tournament.has_started() is True:
-            self.r_control.display_round_infos(
+            self.display_round_infos(
                 self.tournament.get_last_round(), print_games=True)
-        elif not self.tournament.has_started() is False:
+        elif self.tournament.has_started() is False:
             views.menus_views.error_tournament_not_started()
 
     def edit_game(self):
@@ -133,10 +128,10 @@ class MenuControl():
                 if rnd_modif_confirmation != 'y':
                     return
             game_selection = (
-                self.r_control.selector_game(self.tournament.get_last_round())
+                self.selector_game(self.tournament.get_last_round())
                 )
             if game_selection is not None:
-                self.r_control.update_game(game_selection, self.tournament)
+                self.update_game(game_selection, self.tournament)
         else:
             views.menus_views.error_tournament_not_started()
 
@@ -147,11 +142,11 @@ class MenuControl():
                     if self.tournament.has_ended() is True:
                         "print smth"
                     else:
-                        self.r_control.create_round(self.tournament)
+                        self.create_round(self.tournament)
                 else:
                     views.menus_views.error_round_not_ended()
             else:
-                self.r_control.create_round(self.tournament)
+                self.create_round(self.tournament)
         else:
             views.menus_views.error_tournament_not_full()
 
@@ -165,23 +160,32 @@ class MenuControl():
                 self.show_player_in_tournament_by_score()
             while current_round.is_completed() is False:
                 for index in current_round.get_indexes_non_completed_games():
-                    self.r_control.update_game(index, self.tournament)
-                    RoundControl.end_round(self.tournament)
+                    self.update_game(index, self.tournament)
+                    super().end_round(self.tournament)
             else:
-                RoundControl.end_round(self.tournament)
+                super().end_round(self.tournament)
 
     def get_tournament_games_history(self):
         for round in self.tournament.get_rounds():
-            self.r_control.display_round_infos(round, print_games=True)
+            self.display_round_infos(round, print_games=True)
 
     def show_all_players(self):
-        self.p_control.show_players_in_db()
+        if self.check_if_player_in_db() is False:
+            views.menus_views.error_no_player_in_db()
+        else:
+            self.show_players_in_db()
 
     def show_all_players_by_name(self):
-        self.p_control.show_players_in_db(name_sorted=True)
+        if self.check_if_player_in_db() is False:
+            views.menus_views.error_no_player_in_db()
+        else:
+            self.show_players_in_db(name_sorted=True)
 
     def show_all_players_by_elo(self):
-        self.p_control.show_players_in_db(elo_sorted=True)
+        if self.check_if_player_in_db() is False:
+            views.menus_views.error_no_player_in_db()
+        else:
+            self.show_players_in_db(elo_sorted=True)
 
     def create_players(self):
         option_add_to_tournament = None
@@ -201,29 +205,29 @@ class MenuControl():
                     .option_add_to_tournament_when_player_creation())
         for n in range(number_to_create):
             views.menus_views.player_creation_number_printer(n + 1)
-            new_player = self.p_control.create_player()
+            new_player = self.create_player()
             if option_add_to_tournament == 'y':
                 self.tournament.add_player_to_tournament(new_player)
 
     def update_players(self):
-        player_to_update = self.p_control.selector()
+        player_to_update = self.selector()
         if player_to_update is None:
             return
-        updated_player = self.p_control.update_player(player_to_update)
+        updated_player = self.update_player(player_to_update)
         if updated_player is None:
             return
-        self.t_control.update_a_player_in_tournaments(player_to_update,
-                                                      updated_player,
-                                                      self.tournament)
+        self.update_a_player_in_tournaments(player_to_update,
+                                            updated_player,
+                                            self.tournament)
 
     def delete_players_db(self):
         option_all_players_deletion = (
             views.menus_views.delete_all_players_input_confirmation())
         if option_all_players_deletion == 'y':
-            self.p_control.delete_player(all=True)
+            self.delete_player(all=True)
         else:
-            player_to_delete = self.p_control.selector()
-            if self.t_control.check_if_player_is_in_any_tournament(
+            player_to_delete = self.selector()
+            if self.check_if_player_is_in_any_tournament(
                     player_to_delete) is True:
                 delete_confirmation = (
                     views.menus_views
@@ -231,19 +235,19 @@ class MenuControl():
                 if delete_confirmation != 'y':
                     return
                 else:
-                    self.t_control.delete_player_in_tournaments(
+                    self.delete_player_in_tournaments(
                         player_to_delete.serialize())
-                    self.p_control.delete_player(player=player_to_delete)
+                    self.delete_player(player=player_to_delete)
             else:
-                self.p_control.delete_player(player=player_to_delete)
+                self.delete_player(player=player_to_delete)
 
     def add_player_to_tournament(self):
         if self.tournament.player_count() == 8:
             views.menus_views.error_tournament_is_full()
-        elif self.p_control.check_if_player_in_db() is False:
+        elif self.check_if_player_in_db() is False:
             views.menus_views.error_no_player_in_db()
         else:
-            player = self.p_control.selector()
+            player = self.selector()
             if player is not None:
                 if player.serialize() in self.tournament.players:
                     views.menus_views.error_player_already_in_tournament()
@@ -257,14 +261,14 @@ class MenuControl():
         if not self.tournament.players:
             views.menus_views.error_no_players_in_tournament()
         else:
-            TournamentControl.get_sorted_players_in_tournament(
+            self.get_sorted_players_in_tournament(
                 self.tournament, score_sorted=True, _print=True)
 
     def show_player_in_tournament(self):
         if not self.tournament.players:
             views.menus_views.error_no_players_in_tournament()
         else:
-            TournamentControl.get_sorted_players_in_tournament(
+            self.get_sorted_players_in_tournament(
                 self.tournament, elo_sorted=True, _print=True)
 
     def delete_player_in_tournament(self):
@@ -272,6 +276,6 @@ class MenuControl():
             views.menus_views.error_tournament_started()
         else:
             player_to_delete = (
-                self.t_control.tournament_player_selector(self.tournament))
-            self.t_control.delete_player_in_tournaments(
+                self.tournament_player_selector(self.tournament))
+            self.delete_player_in_tournaments(
                 player_to_delete, self.tournament)

@@ -1,7 +1,7 @@
 from views.shared_view import error_invalid_user_input, get_input_for_selectors
 
 
-def creator_view():
+def creator_view() -> dict:
     parameters = {}
     parameters['first_name'] = input('First name ?\n >> ')
     parameters['surname'] = input('Surname ?\n >> ')

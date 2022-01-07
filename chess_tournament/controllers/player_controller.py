@@ -61,8 +61,7 @@ class PlayerControl:
         Player.deserialize(player).update_player_in_db(key)
         return player
 
-    @staticmethod
-    def check_if_player_in_db() -> bool:
+    def check_if_player_in_db(self) -> bool:
         if Player.get_players_in_db():
             return True
         else:

@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from models.player_model import Player
+from controllers.player_controller import PlayerControl
 from models.tournament_model import Tournament
+
 import views.tournament_views
 
 
@@ -20,14 +21,18 @@ class TournamentControl:
         while True:
             index = views.tournament_views.get_input_for_selectors(max_index)
             if index is not None:
-                tournament = tournaments_list[index]
-                return tournament
+                if index > -1:
+                    tournament = tournaments_list[index]
+                    return tournament
+                else:
+                    views.tournament_views.error_invalid_user_input(
+                        error=IndexError)
 
     def tournament_player_selector(self, tournament: Tournament) -> dict:
         players_list = tournament.players
         players_strings = []
         for player in players_list:
-            player = Player.deserialize(player)
+            player = PlayerControl.deserialize_player(player)
             players_strings.append(repr(player))
         views.tournament_views.print_players(players_strings)
         max_index = len(players_list)
@@ -49,8 +54,7 @@ class TournamentControl:
         Tournament.insert(new_tournament)
         return new_tournament
 
-    @staticmethod
-    def get_sorted_players_in_tournament(tournament: Tournament,
+    def get_sorted_players_in_tournament(self, tournament: Tournament,
                                          score_sorted: bool = False,
                                          elo_sorted: bool = False,
                                          _print: bool = False) -> list:
@@ -62,13 +66,12 @@ class TournamentControl:
         if _print is True:
             players_strings = []
             for player in players:
-                player_obj = Player.deserialize(player)
+                player_obj = PlayerControl.deserialize_player(player)
                 players_strings.append(repr(player_obj))
             views.tournament_views.print_players(players_strings)
         return players
 
-    @staticmethod
-    def update_a_player_in_tournaments(player_to_update: Player,
+    def update_a_player_in_tournaments(self, player_to_update: object,
                                        updated_player: dict,
                                        curr_tournament: Tournament = None):
         if curr_tournament:
@@ -86,13 +89,12 @@ class TournamentControl:
                     players[index] = updated_player
                     tournament.update()
 
-    @staticmethod
-    def end_round(tournament: Tournament):
+    def end_round(self, tournament: Tournament):
         end_date = datetime.today().strftime('%Y-%m-%d %H:%M')
         tournament.get_last_round()['end_date'] = end_date
         tournament.update()
 
-    def check_if_player_is_in_any_tournament(self, player: Player) -> bool:
+    def check_if_player_is_in_any_tournament(self, player: object) -> bool:
         for tour in Tournament.get_tournaments_in_db():
             if player.serialize() in tour.players:
                 return True
@@ -118,8 +120,7 @@ class TournamentControl:
         else:
             tournament.delete_a_tournament()
 
-    @staticmethod
-    def check_if_tournament_in_db() -> bool:
+    def check_if_any_tournament_in_db(self) -> bool:
         if Tournament.get_tournaments_in_db():
             return True
         else:
