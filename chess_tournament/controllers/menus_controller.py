@@ -216,7 +216,7 @@ class MenuControl(RoundControl, PlayerControl, TournamentControl):
         player_to_update = self.selector()
         if player_to_update is None:
             return
-        updated_player = self.update_player(player_to_update)
+        updated_player = super().update_player(player_to_update)
         if updated_player is None:
             return
         self.update_a_player_in_tournaments(player_to_update,

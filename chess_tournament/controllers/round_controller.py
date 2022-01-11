@@ -156,8 +156,11 @@ class RoundControl(TournamentControl):
         game = games_in_round[game_index]
         player1 = game[0][0]
         player2 = game[1][0]
-        p1_index = tournament.players.index(player1)
-        p2_index = tournament.players.index(player2)
+        for i, p in enumerate(tournament.players):
+            if p['surname'] == player1['surname']:
+                p1_index = i
+            elif p['surname'] == player2['surname']:
+                p2_index = i
         result = views.round_views.update_game_view(game_index,
                                                     player1, player2)
         if result == -1:
