@@ -20,7 +20,7 @@ A Python installation is required.
 
 Assuming a git installation, clone the repository using:
 
-    $git clone https://github.com/Chfrlt
+    $git clone git clone https://github.com/Chfrlt/P4_chess_tournament
 
 Creating a virtual environment is recommended.
 
@@ -53,7 +53,7 @@ The report result can be found in it under *index.html*
 
 To generate a new report, use:
 > flake8 chess_tournament --format=html --htmldir=<new_report_name>
->> Note: chess_tournament is the default name of the folder containing the code. If it was changed, please update the command fittingly.
+>> Note: chess_tournament is the default name of the folder containing the code. If changed, please update the command fittingly.
 
 </br>
 
@@ -115,7 +115,7 @@ Executing the script will lead to the menus. Navigation is made by input into th
 5) Update a player
     * Allow user to select a player and update one of its value.
         > Note: If the player is registered in any tournament, the value will also update there.
-    Therefore, updating a player's elo prior to a tournament completion should be done with care, as it might lead to issues with the pairing of future rounds.
+    Therefore, updating a player prior to a tournament completion should be done with care.
 6) Delete player(s) in database
     * Allows the user to delete **all** or a single player in the database.
         > Note: When deleting players, if the player to delete is registered in any tournament that has already started (a round is in progress), the player will not be deleted from it.
@@ -157,9 +157,9 @@ Executing the script will lead to the menus. Navigation is made by input into th
 2) Add Player to tournament
     * Allows the user to add a player from the database to the tournament.
 3) Show players in tournament
-    * Display current players registered in the current tournament.
+    * Display players registered in the current tournament.
 4) Show players in tournament by score
-    * Display current players registered in the current tournament by score(from higher to lower)
+    * Display players registered in the current tournament by score(from higher to lower)
 5) Delete a player in tournament
     * Allows the user to delete a player from the current tournament.
 6) Tournament menu
