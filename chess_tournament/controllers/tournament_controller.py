@@ -1,8 +1,7 @@
 from datetime import datetime
 
-from controllers.player_controller import PlayerControl
+from models.player_model import Player
 from models.tournament_model import Tournament
-
 import views.tournament_views
 
 
@@ -32,7 +31,7 @@ class TournamentControl:
         players_list = tournament.players
         players_strings = []
         for player in players_list:
-            player = PlayerControl.deserialize_player(player)
+            player = Player.deserialize(player)
             players_strings.append(repr(player))
         views.tournament_views.print_players(players_strings)
         max_index = len(players_list)
@@ -66,12 +65,12 @@ class TournamentControl:
         if _print is True:
             players_strings = []
             for player in players:
-                player_obj = PlayerControl.deserialize_player(player)
+                player_obj = Player.deserialize(player)
                 players_strings.append(repr(player_obj))
             views.tournament_views.print_players(players_strings)
         return players
 
-    def update_a_player_in_tournaments(self, player_to_update: object,
+    def update_a_player_in_tournaments(self, player_to_update: Player,
                                        updated_player: dict,
                                        curr_tournament: Tournament = None):
         if curr_tournament:
@@ -94,7 +93,7 @@ class TournamentControl:
         tournament.get_last_round()['end_date'] = end_date
         tournament.update()
 
-    def check_if_player_is_in_any_tournament(self, player: object) -> bool:
+    def check_if_player_is_in_any_tournament(self, player: Player) -> bool:
         for tour in Tournament.get_tournaments_in_db():
             if player.serialize() in tour.players:
                 return True

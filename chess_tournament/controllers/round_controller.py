@@ -84,9 +84,7 @@ class RoundControl(TournamentControl):
         new_games = []
         for i in range(int(len(players) / 2)):
             player1 = upper_half[i]
-            print(player1)
             player2 = lower_half[i]
-            print(player2)
             new_game = ([player1, 0.0], [player2, 0.0])
             new_games.append(new_game)
         return new_games
@@ -98,29 +96,40 @@ class RoundControl(TournamentControl):
         upper_half.reverse()
         lower_half.reverse()
 
+        for p in upper_half:
+            p['opponents'] = []
+        for i, p in enumerate(upper_half):
+            for game in old_games:
+                p1 = game[0][0]
+                p2 = game[1][0]
+                _is_index_0 = all([value == p[key]
+                                  for key, value in p1.items()
+                                  if key != 'score'])
+                _is_index_1 = all([value == p[key]
+                                  for key, value in p2.items()
+                                  if key != 'score'])
+                if _is_index_0 is True:
+                    upper_half[i]['opponents'].append(game[1][0])
+                elif _is_index_1 is True:
+                    upper_half[i]['opponents'].append(game[0][0])
+
         new_games = []
         while lower_half:
             player1 = upper_half[0]
             player_iterator = cycle(lower_half)
             player2 = player_iterator.__next__()
-            for old_game in old_games:
-                if player1 in old_game:
-                    if player2 in old_game:
-                        player2 = player_iterator.__next__()
-                    else:
-                        try:
-                            player1_next = upper_half[1]
-                            player2_next = player_iterator.__next__()
-                            for old_game in old_games:
-                                if player1_next in old_game:
-                                    if player2_next in old_game:
-                                        player2 = player2_next
-                                        break
-                        except IndexError:
-                            continue
+            while player2 in player1['opponents']:
+                if all(p in player1['opponents'] for p in lower_half) is True:
+                    upper_half.append(new_games[-1][0][0])
+                    lower_half.append(new_games[-1][1][0])
+                    new_games.pop()
+                else:
+                    player2 = player_iterator.__next__()
+                    break
+            del player1['opponents']
             upper_half.remove(player1)
             lower_half.remove(player2)
-            new_game = ([player1, player2])
+            new_game = ([player1, 0], [player2, 0])
             new_games.append(new_game)
         return new_games
 

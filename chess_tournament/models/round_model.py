@@ -20,8 +20,8 @@ class Round():
                  'end_date': self.end_date}
         return round
 
-    @staticmethod
-    def deserialize(round: dict) -> dict:
+    @classmethod
+    def deserialize(cls, round: dict) -> dict:
         r = Round(round['name'], round['games'],
                   round['start_date'], round['end_date'])
         return r
@@ -31,7 +31,7 @@ class Round():
             end_date_string = self.end_date
         else:
             end_date_string = 'In progress'
-        rnd_str = (f"Name: {self.name}, started: {self.start_date}, "
+        rnd_str = (f"{self.name}, started: {self.start_date}, "
                    f"ended: {end_date_string}")
         return rnd_str
 
@@ -45,9 +45,9 @@ class Round():
             game_str = f"== Game {i + 1} ==\n"
             game_str += (
                 f"Player 1: {player1['surname']} {player1['first_name']}, "
-                f"score: {player1['score']}, elo: {player1['elo']}\nvs\n"
+                f"elo: {player1['elo']}\nvs\n"
                 f"Player 2: {player2['surname']} {player2['first_name']}, "
-                f"score: {player2['score']}, elo: {player2['elo']}")
+                f"elo: {player2['elo']}")
             if score1 > score2:
                 game_str += (f"\nResult: {player1['surname']} "
                              f"{player1['first_name']} WIN")

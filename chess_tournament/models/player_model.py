@@ -40,24 +40,24 @@ class Player():
             except ValueError:
                 raise ValueError
 
-    @staticmethod
-    def get_players_in_db() -> list:
+    @classmethod
+    def get_players_in_db(cls) -> list:
         '''Return a list of all players in database'''
         list_players = []
         for player in table.all():
             list_players.append(Player.deserialize(player))
         return list_players
 
-    @staticmethod
-    def deserialize(player: dict) -> object:
+    @classmethod
+    def deserialize(cls, player: dict) -> object:
         '''Transform a player class dict into a class object'''
         p = Player(player['first_name'], player['surname'],
                    player['birthdate'], player['gender'],
                    player['elo'], player['score'])
         return p
 
-    @staticmethod
-    def delete_all_players():
+    @classmethod
+    def delete_all_players(cls):
         table.truncate()
 
     def delete_a_player(self):

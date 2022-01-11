@@ -103,7 +103,7 @@ class MenuControl(RoundControl, PlayerControl, TournamentControl):
         confirmation = (
             views.menus_views.delete_all_tournament_input_confirmation())
         if confirmation == 'y':
-            self.delete_tournament(all_tournaments=True)
+            super().delete_tournament(all_tournaments=True)
             views.menus_views.delete_all_tournament_success()
             self.tournament = None
         else:
@@ -166,8 +166,11 @@ class MenuControl(RoundControl, PlayerControl, TournamentControl):
                 super().end_round(self.tournament)
 
     def get_tournament_games_history(self):
-        for round in self.tournament.get_rounds():
-            self.display_round_infos(round, print_games=True)
+        if self.tournament.has_started():
+            for round in self.tournament.get_rounds():
+                self.display_round_infos(round, print_games=True)
+        else:
+            views.menus_views.error_tournament_not_started()
 
     def show_all_players(self):
         if self.check_if_player_in_db() is False:

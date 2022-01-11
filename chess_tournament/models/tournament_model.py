@@ -57,23 +57,23 @@ class Tournament():
         table.insert(tournament)
         return tournament
 
-    @staticmethod
-    def deserialize(tournament):
+    @classmethod
+    def deserialize(cls, tournament):
         t = Tournament(tournament['name'], tournament['location'],
                        tournament['game_format'], tournament['description'],
                        tournament['date_start'], tournament['date_end'],
                        tournament['rounds'], tournament['players'])
         return t
 
-    @staticmethod
-    def get_tournaments_in_db():
+    @classmethod
+    def get_tournaments_in_db(cls):
         list_tournaments = []
         for tournament in table.all():
             list_tournaments.append(Tournament.deserialize(tournament))
         return list_tournaments
 
-    @staticmethod
-    def delete_all_tournaments():
+    @classmethod
+    def delete_all_tournaments(cls):
         table.truncate()
 
     def delete_a_tournament(self):

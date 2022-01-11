@@ -18,7 +18,7 @@ class PlayerControl:
                     player_parameters['gender'],
                     player_parameters['elo']
                 )
-                Player.insert(new_player)
+                new_player.insert()
                 return new_player
             except ValueError:
                 views.player_views.invalid_elo_input()
