@@ -109,29 +109,24 @@ class RoundControl(TournamentControl):
 
     def past_first_round_pairings(self, players: list,
                                   old_games: list) -> list:
-        upper_half = players[:int(len(players) / 2)]
-        lower_half = players[int(len(players) / 2):]
-        upper_half.reverse()
-        lower_half.reverse()
-
         new_games = []
-        while lower_half:
-            player1 = upper_half[0]
+        while players:
+            player1 = players[0]
             if 'opponents' not in player1:
                 player1 = self.get_player_past_opponents(player1, old_games)
-            player_iterator = cycle(lower_half)
+            player_iterator = cycle(players[1:])
             player2 = player_iterator.__next__()
             while player2 in player1['opponents']:
-                if all(p in player1['opponents'] for p in lower_half) is True:
-                    upper_half.append(new_games[-1][0][0])
-                    lower_half.append(new_games[-1][1][0])
+                if all(p in player1['opponents'] for p in players[1:]) is True:
+                    players.append(new_games[-1][0][0])
+                    players.append(new_games[-1][1][0])
                     new_games.pop()
                 else:
                     player2 = player_iterator.__next__()
                     break
             del player1['opponents']
-            upper_half.remove(player1)
-            lower_half.remove(player2)
+            players.remove(player1)
+            players.remove(player2)
             new_game = ([player1, 0], [player2, 0])
             new_games.append(new_game)
         return new_games

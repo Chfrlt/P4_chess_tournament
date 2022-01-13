@@ -23,9 +23,8 @@ class Player():
         '''Represent class object as a string'''
         player_string = (
             f"{self.surname} {self.first_name} | Elo: {self.elo} | "
-            f"Gender: {self.gender}, birthdate: {self.birthdate}")
-        if self.score != 0:
-            player_string += f", score: {self.score}"
+            f"Gender: {self.gender}, birthdate: {self.birthdate} "
+            f", score: {self.score}")
         return player_string
 
     @staticmethod
