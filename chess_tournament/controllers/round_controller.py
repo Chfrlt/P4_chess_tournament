@@ -89,6 +89,24 @@ class RoundControl(TournamentControl):
             new_games.append(new_game)
         return new_games
 
+    def get_player_past_opponents(self, player: dict,
+                                  old_games: list) -> list:
+        player['opponents'] = []
+        for game in old_games:
+            p1 = game[0][0]
+            p2 = game[1][0]
+            _is_index_0 = all([value == player[key]
+                              for key, value in p1.items()
+                              if key != 'score'])
+            _is_index_1 = all([value == player[key]
+                              for key, value in p2.items()
+                              if key != 'score'])
+            if _is_index_0 is True:
+                player['opponents'].append(game[1][0])
+            elif _is_index_1 is True:
+                player['opponents'].append(game[0][0])
+        return player
+
     def past_first_round_pairings(self, players: list,
                                   old_games: list) -> list:
         upper_half = players[:int(len(players) / 2)]
@@ -96,26 +114,11 @@ class RoundControl(TournamentControl):
         upper_half.reverse()
         lower_half.reverse()
 
-        for p in upper_half:
-            p['opponents'] = []
-        for i, p in enumerate(upper_half):
-            for game in old_games:
-                p1 = game[0][0]
-                p2 = game[1][0]
-                _is_index_0 = all([value == p[key]
-                                  for key, value in p1.items()
-                                  if key != 'score'])
-                _is_index_1 = all([value == p[key]
-                                  for key, value in p2.items()
-                                  if key != 'score'])
-                if _is_index_0 is True:
-                    upper_half[i]['opponents'].append(game[1][0])
-                elif _is_index_1 is True:
-                    upper_half[i]['opponents'].append(game[0][0])
-
         new_games = []
         while lower_half:
             player1 = upper_half[0]
+            if 'opponents' not in player1:
+                player1 = self.get_player_past_opponents(player1, old_games)
             player_iterator = cycle(lower_half)
             player2 = player_iterator.__next__()
             while player2 in player1['opponents']:
