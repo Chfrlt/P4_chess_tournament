@@ -140,7 +140,8 @@ class MenuControl(RoundControl, PlayerControl, TournamentControl):
             if self.tournament.has_started() is True:
                 if self.tournament.get_last_round().has_ended() is True:
                     if self.tournament.has_ended() is True:
-                        "print smth"
+                        views.menus_views.error_tournament_ended()
+                        self.show_player_in_tournament_by_score()
                     else:
                         self.create_round(self.tournament)
                 else:
