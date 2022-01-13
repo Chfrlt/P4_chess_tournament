@@ -1,5 +1,6 @@
 from views.shared_view import (input_is_valid_as_an_int,
-                               get_input_for_selectors)
+                               get_input_for_selectors,
+                               error_invalid_user_input)
 
 
 def creator_view() -> dict:
