@@ -12,6 +12,7 @@ class PlayerControl:
             player_parameters = views.player_views.creator_view()
             try:
                 new_player = Player(
+                    len(Player.get_players_in_db()) if Player.get_players_in_db() else 0,
                     player_parameters['first_name'],
                     player_parameters['surname'],
                     player_parameters['birthdate'],

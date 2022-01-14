@@ -1,4 +1,4 @@
-from views.shared_view import get_input_for_selectors
+import views.shared_view
 
 
 def print_round(round_repr: str):
@@ -14,7 +14,7 @@ def print_game(games_reprs: str):
 def game_selector_view() -> int:
     print('Select a game:\n [0] Cancel')
     while True:
-        game_selection = get_input_for_selectors(4)
+        game_selection = views.shared_view.get_input_for_selectors(4)
         if game_selection == -1:
             break
         else:
@@ -30,5 +30,5 @@ def update_game_view(game_index: int, player1, player2) -> int:
     print('[0] Cancel')
     print('Result ?')
     while True:
-        result_input = get_input_for_selectors(4)
+        result_input = views.shared_view.get_input_for_selectors(4)
         return result_input

@@ -1,6 +1,6 @@
 from typing import Union
 
-from views.shared_view import get_input_for_selectors
+import views.shared_view
 
 
 def menu_view(options: list, name: str,
@@ -16,7 +16,7 @@ def menu_view(options: list, name: str,
     print('==============')
     for i, o in enumerate(options):
         print(f"[{i + 1}] {o}")
-    index = get_input_for_selectors(i)
+    index = views.shared_view.get_input_for_selectors(i)
     if index is not None:
         option_selected = options[index]
         print(option_selected)

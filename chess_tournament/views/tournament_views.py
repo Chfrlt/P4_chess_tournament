@@ -1,6 +1,4 @@
-from views.shared_view import (input_is_valid_as_an_int,
-                               get_input_for_selectors,
-                               error_invalid_user_input)
+import views.shared_view
 
 
 def creator_view() -> dict:
@@ -11,7 +9,7 @@ def creator_view() -> dict:
     max_index = len(format_options)
     print('Format ?\n    [1] rapid\n    [2] blitz\n    [3] bullet')
     while True:
-        index = get_input_for_selectors(max_index)
+        index = views.shared_view.get_input_for_selectors(max_index)
         parameters['game_format'] = format_options[index]
         break
     parameters['description'] = input('Description ?\n >> ')
@@ -19,7 +17,7 @@ def creator_view() -> dict:
     print('Ending date ?')
     print('Optional | [0]: Same as starting date.')
     input_date_end = input(' >> ')
-    if input_is_valid_as_an_int(input_date_end) is True:
+    if views.shared_view.input_is_valid_as_an_int(input_date_end) is True:
         if int(input_date_end) == 0:
             parameters['date_end'] = parameters['date_start']
         else:
