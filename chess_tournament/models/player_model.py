@@ -9,9 +9,10 @@ q = Query()
 
 class Player():
 
-    def __init__(self, first_name: str, surname: str,
+    def __init__(self, id, first_name: str, surname: str,
                  birthdate: str, gender: str, elo: int,
                  score: float = None):
+        self.id = id
         self.first_name = first_name
         self.surname = surname
         self.birthdate = birthdate
@@ -50,7 +51,7 @@ class Player():
     @classmethod
     def deserialize(cls, player: dict) -> object:
         '''Transform a player class dict into a class object'''
-        p = Player(player['first_name'], player['surname'],
+        p = Player(player['id'], player['first_name'], player['surname'],
                    player['birthdate'], player['gender'],
                    player['elo'], player['score'])
         return p
@@ -60,11 +61,12 @@ class Player():
         table.truncate()
 
     def delete_a_player(self):
-        table.remove(where('surname') == self.surname)
+        table.remove(where('id') == self.id)
 
     def serialize(self) -> dict:
         '''Transform a class object into a dict'''
         player = {
+            'id': self.id,
             'first_name': self.first_name,
             'surname': self.surname,
             'birthdate': self.birthdate,
@@ -79,9 +81,6 @@ class Player():
         player = self.serialize()
         table.insert(player)
 
-    def update_player_in_db(self, updated_key):
+    def update_player_in_db(self):
         'Update values of a player object in database'
-        if updated_key == 'surname':
-            table.update(self.serialize(), q.birthdate == self.birthdate)
-        else:
-            table.update(self.serialize(), q.surname == self.surname)
+        table.update(self.serialize(), q.id == self.id)

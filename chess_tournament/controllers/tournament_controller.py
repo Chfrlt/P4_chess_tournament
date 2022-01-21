@@ -12,20 +12,9 @@ class TournamentControl:
 
     def tournament_selector(self) -> Tournament:
         tournaments_list = Tournament.get_tournaments_in_db()
-        tournaments_strings = []
-        for tournament in tournaments_list:
-            tournaments_strings.append(repr(tournament))
-        views.tournament_views.print_tournaments(tournaments_strings)
-        max_index = len(tournaments_list)
-        while True:
-            index = views.tournament_views.get_input_for_selectors(max_index)
-            if index is not None:
-                if index > -1:
-                    tournament = tournaments_list[index]
-                    return tournament
-                else:
-                    views.tournament_views.error_invalid_user_input(
-                        error=IndexError)
+        index = views.tournament_views.tournament_selector_view(tournaments_list)
+        if index is not None:
+            return tournaments_list[index]
 
     def tournament_player_selector(self, tournament: Tournament) -> dict:
         players_list = tournament.players
@@ -76,14 +65,14 @@ class TournamentControl:
         if curr_tournament:
             players = curr_tournament.players
             for player in players:
-                if player_to_update.surname == player['surname']:
+                if player_to_update.id == player['id']:
                     index = players.index(player)
                     players[index] = updated_player
                     curr_tournament.update()
         for tournament in Tournament.get_tournaments_in_db():
             players = tournament.players
             for player in players:
-                if player_to_update.surname == player['surname']:
+                if player_to_update.id == player['id']:
                     index = players.index(player)
                     players[index] = updated_player
                     tournament.update()

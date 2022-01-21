@@ -4,20 +4,22 @@ import views.shared_view
 
 
 def menu_view(options: list, name: str,
-              tournament_string: str = None,
-              round_string: str = None):
+              tournament: object = None,
+              round: object = None):
     print(f"== {name} ==")
     print('==============')
-    if tournament_string:
+    if tournament:
         print('Selected Tournament:')
-        print(tournament_string)
-    if round_string:
-        print(round_string)
-    print('==============')
+        print(tournament)
+        if round:
+            print(round)
+        print('==============')
     for i, o in enumerate(options):
         print(f"[{i + 1}] {o}")
     index = views.shared_view.get_input_for_selectors(i)
     if index is not None:
+        if index == -1:
+            return
         option_selected = options[index]
         print(option_selected)
         return option_selected

@@ -66,7 +66,7 @@ class Tournament():
         return t
 
     @classmethod
-    def get_tournaments_in_db(cls):
+    def get_tournaments_in_db(cls) -> list:
         list_tournaments = []
         for tournament in table.all():
             list_tournaments.append(Tournament.deserialize(tournament))

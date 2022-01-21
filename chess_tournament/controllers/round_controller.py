@@ -1,23 +1,28 @@
 from datetime import datetime
 from itertools import cycle
+from typing import Union
+
+from tinydb.utils import D
 
 from controllers.tournament_controller import TournamentControl
 from models.round_model import Round
 from models.tournament_model import Tournament
 import views.round_views
 
+WIN = 1
+LOSE = 0
+DRAW = 0.5
 
 class RoundControl(TournamentControl):
 
     def __init__(self) -> None:
         pass
 
-    def display_round_infos(self, round: Round, print_games: bool = False):
+    def display_round_infos(self, round: Union[Round, dict], print_games: bool = False):
         """Games informations for the round"""
         if isinstance(round, dict):
             round = Round.deserialize(round)
-        rnd_repr = repr(round)
-        views.round_views.print_round(rnd_repr)
+        views.round_views.print_round(round)
         if print_games is True:
             games_reprs = round.game_repr()
             views.round_views.print_game(games_reprs)
@@ -89,9 +94,9 @@ class RoundControl(TournamentControl):
             new_games.append(new_game)
         return new_games
 
-    def get_player_past_opponents(self, player: dict,
+    def get_player_past_opponents_ids(self, player: dict,
                                   old_games: list) -> list:
-        player['opponents'] = []
+        player['opponents_ids'] = []
         for game in old_games:
             p1 = game[0][0]
             p2 = game[1][0]
@@ -102,9 +107,9 @@ class RoundControl(TournamentControl):
                               for key, value in p2.items()
                               if key != 'score'])
             if _is_index_0 is True:
-                player['opponents'].append(game[1][0])
+                player['opponents_ids'].append(game[1][0]['id'])
             elif _is_index_1 is True:
-                player['opponents'].append(game[0][0])
+                player['opponents_ids'].append(game[0][0]['id'])
         return player
 
     def past_first_round_pairings(self, players: list,
@@ -112,19 +117,19 @@ class RoundControl(TournamentControl):
         new_games = []
         while players:
             player1 = players[0]
-            if 'opponents' not in player1:
-                player1 = self.get_player_past_opponents(player1, old_games)
+            if 'opponents_ids' not in player1:
+                player1 = self.get_player_past_opponents_ids(player1, old_games)
             player_iterator = cycle(players[1:])
             player2 = player_iterator.__next__()
-            while player2 in player1['opponents']:
-                if all(p in player1['opponents'] for p in players[1:]) is True:
+            while player2['id'] in player1['opponents_ids']:
+                if all([lambda: p['id'] in player1['opponents_ids'] for p in players[1:]]) is True:
                     players.append(new_games[-1][0][0])
                     players.append(new_games[-1][1][0])
                     new_games.pop()
                 else:
                     player2 = player_iterator.__next__()
                     break
-            del player1['opponents']
+            del player1['opponents_ids']
             players.remove(player1)
             players.remove(player2)
             new_game = ([player1, 0], [player2, 0])
@@ -134,16 +139,16 @@ class RoundControl(TournamentControl):
     def reset_game_results(self,
                            game: tuple) -> tuple:
         """Reset a game result to 0"""
-        if game[0][1] == 1:
-            game[0][0]['score'] -= 1
-        elif game[0][1] == 0.5:
-            game[0][0] -= 0.5
-        if game[1][1] == 1:
-            game[1][0]['score'] -= 1
-        elif game[1][1] == 0.5:
-            game[1][0]['score'] -= 0.5
-        game[0][1] = 0
-        game[1][1] = 0
+        if game[0][1] == WIN:
+            game[0][0]['score'] -= WIN
+        elif game[0][1] == DRAW:
+            game[0][0] -= DRAW
+        if game[1][1] == WIN:
+            game[1][0]['score'] -= WIN
+        elif game[1][1] == DRAW:
+            game[1][0]['score'] -= DRAW
+        game[0][1] = LOSE
+        game[1][1] = LOSE
         return game
 
     def update_game(self, game_index: int, tournament: Tournament):
@@ -155,27 +160,27 @@ class RoundControl(TournamentControl):
         player1 = game[0][0]
         player2 = game[1][0]
         for i, p in enumerate(tournament.players):
-            if p['surname'] == player1['surname']:
+            if p['id'] == player1['id']:
                 p1_index = i
-            elif p['surname'] == player2['surname']:
+            elif p['id'] == player2['id']:
                 p2_index = i
         result = views.round_views.update_game_view(game_index,
                                                     player1, player2)
         if result == -1:
             return
         elif result == 0:
-            game[0][0]['score'] += 1
-            game[0][1] = 1
-            game[1][1] = 0
+            game[0][0]['score'] += WIN
+            game[0][1] = WIN
+            game[1][1] = LOSE
         elif result == 1:
-            game[1][0]['score'] += 1
-            game[0][1] = 0
-            game[1][1] = 1
+            game[1][0]['score'] += WIN
+            game[0][1] = LOSE
+            game[1][1] = WIN
         elif result == 2:
-            game[0][0]['score'] += 0.5
-            game[1][0]['score'] += 0.5
-            game[0][1] = 0.5
-            game[1][1] = 0.5
+            game[0][0]['score'] += DRAW
+            game[1][0]['score'] += DRAW
+            game[0][1] = DRAW
+            game[1][1] = DRAW
         elif result == 3:
             game = self.reset_game_results(game)
         tournament.players[p1_index] = game[0][0]

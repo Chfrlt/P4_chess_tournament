@@ -10,28 +10,29 @@ class PlayerControl:
     def create_player(self) -> Player:
         while True:
             player_parameters = views.player_views.creator_view()
-            try:
-                new_player = Player(
-                    len(Player.get_players_in_db()) if Player.get_players_in_db() else 0,
-                    player_parameters['first_name'],
-                    player_parameters['surname'],
-                    player_parameters['birthdate'],
-                    player_parameters['gender'],
-                    player_parameters['elo']
-                )
-                new_player.insert()
-                return new_player
-            except ValueError:
-                views.player_views.invalid_elo_input()
+            if player_parameters:
+                try:
+                    new_player = Player(
+                        len([Player.get_players_in_db()])
+                        if self.check_if_player_in_db() is True else 0,
+                        player_parameters['first_name'],
+                        player_parameters['surname'],
+                        player_parameters['birthdate'],
+                        player_parameters['gender'],
+                        player_parameters['elo']
+                    )
+                    new_player.insert()
+                    return new_player
+                except ValueError:
+                    views.player_views.invalid_elo_input()
+            else:
+                return
 
-    def selector(self) -> Player:
+    def player_selector(self) -> Player:
         player_list = Player.get_players_in_db()
-        if self.check_if_player_in_db() is False:
-            views.player_views.selector_view()
-        else:
-            index = views.player_views.selector_view(player_list)
-            if index is not None:
-                return player_list[index]
+        index = views.player_views.player_selector_view(player_list)
+        if index is not None:
+            return player_list[index]
 
     def show_players_in_db(self, name_sorted=False, elo_sorted=False):
         if self.check_if_player_in_db() is True:
@@ -40,12 +41,9 @@ class PlayerControl:
                 players = sorted(players, key=lambda x: x.surname)
             elif elo_sorted is True:
                 players = sorted(players, key=lambda x: x.elo, reverse=True)
-            players_strings = []
-            for player in players:
-                players_strings.append(repr(player))
-            views.player_views.print_players(players_strings)
+            views.player_views.print_players(players)
 
-    def update_player(self, player: Player):
+    def update_player(self, player: Player) -> Player:
         player = player.serialize()
         to_update = views.player_views.update_view(player)
         if to_update is None:
@@ -59,7 +57,7 @@ class PlayerControl:
                 views.player_views.invalid_elo_input()
                 return
         player[key] = new_value
-        Player.deserialize(player).update_player_in_db(key)
+        Player.deserialize(player).update_player_in_db()
         return player
 
     def check_if_player_in_db(self) -> bool:
@@ -71,5 +69,5 @@ class PlayerControl:
     def delete_player(self, player: Player = None, all: bool = False):
         if all is True:
             Player.delete_all_players()
-        else:
+        elif player:
             player.delete_a_player()

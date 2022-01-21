@@ -1,4 +1,5 @@
-import views.shared_view
+from views.shared_view import (input_is_valid_as_an_int,
+                               get_input_for_selectors)
 
 
 def creator_view() -> dict:
@@ -9,7 +10,7 @@ def creator_view() -> dict:
     max_index = len(format_options)
     print('Format ?\n    [1] rapid\n    [2] blitz\n    [3] bullet')
     while True:
-        index = views.shared_view.get_input_for_selectors(max_index)
+        index = get_input_for_selectors(max_index)
         parameters['game_format'] = format_options[index]
         break
     parameters['description'] = input('Description ?\n >> ')
@@ -17,7 +18,7 @@ def creator_view() -> dict:
     print('Ending date ?')
     print('Optional | [0]: Same as starting date.')
     input_date_end = input(' >> ')
-    if views.shared_view.input_is_valid_as_an_int(input_date_end) is True:
+    if input_is_valid_as_an_int(input_date_end) is True:
         if int(input_date_end) == 0:
             parameters['date_end'] = parameters['date_start']
         else:
@@ -26,6 +27,14 @@ def creator_view() -> dict:
         parameters['date_end'] = input_date_end
     return parameters
 
+def tournament_selector_view(tournament_list: list) -> int:
+    print('Select a tournament:\n [0] Cancel')
+    for i, t in enumerate(tournament_list):
+        print(f"[{i + 1}] {t}")
+    max_index = len(tournament_list)
+    while True:
+        index = get_input_for_selectors(max_index)
+        return index
 
 def print_tournaments(tournaments_strings: list) -> int:
     print('== Tournaments ==')
