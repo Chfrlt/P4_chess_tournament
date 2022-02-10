@@ -2,8 +2,6 @@ from datetime import datetime
 from itertools import cycle
 from typing import Union
 
-from tinydb.utils import D
-
 from controllers.tournament_controller import TournamentControl
 from models.round_model import Round
 from models.tournament_model import Tournament
@@ -12,6 +10,7 @@ import views.round_views
 WIN = 1
 LOSE = 0
 DRAW = 0.5
+
 
 class RoundControl(TournamentControl):
 
@@ -95,7 +94,7 @@ class RoundControl(TournamentControl):
         return new_games
 
     def get_player_past_opponents_ids(self, player: dict,
-                                  old_games: list) -> list:
+                                      old_games: list) -> list:
         player['opponents_ids'] = []
         for game in old_games:
             p1 = game[0][0]
@@ -122,10 +121,11 @@ class RoundControl(TournamentControl):
             player_iterator = cycle(players[1:])
             player2 = player_iterator.__next__()
             while player2['id'] in player1['opponents_ids']:
-                if all([lambda: p['id'] in player1['opponents_ids'] for p in players[1:]]) is True:
+                if len(players) == 2:
                     players.append(new_games[-1][0][0])
                     players.append(new_games[-1][1][0])
                     new_games.pop()
+                    player_iterator = cycle(players[1:])
                 else:
                     player2 = player_iterator.__next__()
                     break
@@ -159,6 +159,8 @@ class RoundControl(TournamentControl):
         game = games_in_round[game_index]
         player1 = game[0][0]
         player2 = game[1][0]
+        p1_index = None
+        p2_index = None
         for i, p in enumerate(tournament.players):
             if p['id'] == player1['id']:
                 p1_index = i
@@ -183,8 +185,10 @@ class RoundControl(TournamentControl):
             game[1][1] = DRAW
         elif result == 3:
             game = self.reset_game_results(game)
-        tournament.players[p1_index] = game[0][0]
-        tournament.players[p2_index] = game[1][0]
+        if p1_index:
+            tournament.players[p1_index] = game[0][0]
+        if p2_index:
+            tournament.players[p2_index] = game[1][0]
         tournament.get_last_round().games[game_index] = game
         tournament.update()
 

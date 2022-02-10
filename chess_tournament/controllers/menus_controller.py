@@ -218,8 +218,8 @@ class MenuControl(RoundControl, PlayerControl, TournamentControl):
         if updated_player is None:
             return
         super().update_a_player_in_tournaments(player_to_update,
-                                            updated_player,
-                                            self.tournament)
+                                               updated_player,
+                                               self.tournament)
 
     def delete_players_db(self):
         option_all_players_deletion = (

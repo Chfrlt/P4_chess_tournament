@@ -27,6 +27,7 @@ def creator_view() -> dict:
         parameters['date_end'] = input_date_end
     return parameters
 
+
 def tournament_selector_view(tournament_list: list) -> int:
     print('Select a tournament:\n [0] Cancel')
     for i, t in enumerate(tournament_list):
@@ -35,6 +36,7 @@ def tournament_selector_view(tournament_list: list) -> int:
     while True:
         index = get_input_for_selectors(max_index)
         return index
+
 
 def print_tournaments(tournaments_strings: list) -> int:
     print('== Tournaments ==')

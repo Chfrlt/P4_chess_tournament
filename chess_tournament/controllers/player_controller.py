@@ -13,7 +13,7 @@ class PlayerControl:
             if player_parameters:
                 try:
                     new_player = Player(
-                        len([Player.get_players_in_db()])
+                        len(Player.get_players_in_db())
                         if self.check_if_player_in_db() is True else 0,
                         player_parameters['first_name'],
                         player_parameters['surname'],

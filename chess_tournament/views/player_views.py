@@ -51,7 +51,7 @@ def update_view(player: dict) -> dict:
                 return {'key': key_to_update, 'value': new_value}
 
 
-def print_players(players: list, show_score= True):
+def print_players(players: list):
     for i, player in enumerate(players):
         print(f"[{i + 1}] | {player}")
     input('Press a key to continue.')
