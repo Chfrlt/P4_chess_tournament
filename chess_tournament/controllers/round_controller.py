@@ -120,15 +120,16 @@ class RoundControl(TournamentControl):
                 player1 = self.get_player_past_opponents_ids(player1, old_games)
             player_iterator = cycle(players[1:])
             player2 = player_iterator.__next__()
-            while player2['id'] in player1['opponents_ids']:
-                if len(players) == 2:
+            while True:
+                if all([p['id'] in player1['opponents_ids'] for p in players[1:]]) is True:
                     players.append(new_games[-1][0][0])
                     players.append(new_games[-1][1][0])
                     new_games.pop()
                     player_iterator = cycle(players[1:])
                 else:
                     player2 = player_iterator.__next__()
-                    break
+                    if player2['id'] not in player1['opponents_ids']:
+                        break
             del player1['opponents_ids']
             players.remove(player1)
             players.remove(player2)
